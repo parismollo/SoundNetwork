@@ -1,5 +1,4 @@
 # NoiseBook_BD6
-
 Projet de L3 semestre 6 (Licence d'informatique générale).
 
 ## Description

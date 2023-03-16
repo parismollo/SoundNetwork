@@ -121,4 +121,4 @@ Probablement un table de la structure suivante:
 
 **Attention au paragraphe suivante:**
 
-**Réfléchissez au préalable aux requêtes que vous serez amenés à implémenter (Section 3 et 4) pour savoir quellesinformations seront indispensables dans votre base.** Vous commencerez par réaliser le modèle conceptuel de données (schéma entités-associations) pour le Rendu 1, puis vous pourrez passer à l’implémentation dans PostgreSQL pour le Rendu 2. **Utilisez les différents outils étudiés en cours et en TP (clés primaires/étrangères, contraintes d’intégrité, types adaptés ...**
+**Réfléchissez au préalable aux requêtes que vous serez amenés à implémenter (Section 3 et 4) pour savoir quellesinformations seront indispensables dans votre base.** Vous commencerez par réaliser le modèle conceptuel de données (schéma entités-associations) pour le Rendu 1, puis vous pourrez passer à l’implémentation dans PostgreSQL pour le Rendu 2. **Utilisez les différents outils étudiés en cours et en TP clés primaires/étrangères, contraintes d’intégrité, types adaptés ...**
