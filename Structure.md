@@ -105,8 +105,10 @@ Ici il est important de respecter la contrainte suivante: *Attention à bien rep
   * Table de Notes (Morceau_ID, USER_ID, Note (int))
 
 ## User Historique
-Ici je n'ai pas compris à quoi ça consiste le historique exactement...ce sont les musiques ecouté? :/
- 
+- Events (par exemple concerts) qui user a participé.
+- Musiques qui user a ecouté (?)
+
+
 ## User Suggestions
 Ici en fonction de l'utilisateur on doit proposer des suggestions des chansons, concerts, etc. Probablement l'algorithme utilisera des tags afin de proposer quelque chose. Par contre, dans le pdf il dit "*concerts auxquels ils ont assistés, genres voisins qu’ils pourraient explorer, personnes avec lesquelles ils pourraient avoir des affinités, villes dans lesquelles ils pourraient trouver à s’amuser,....*". Ici on perçoit un niveau plus profond de recommendation car par exemple on doit en fonction des concerts et leurs tags identifier quelles villes contiendront les concerts qui peuvent interésser l'utilisateur.
 
