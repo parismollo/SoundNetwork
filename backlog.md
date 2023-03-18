@@ -1,8 +1,8 @@
 # Backlog
 - [ ] Schéma entités-associations
   - [ ] multiplicités
-  - [ ] attributs de chaque entité
-  - [ ] relations et connection
-  - [ ] User historique
   - [ ] User suggestions
-  - [ ] Lieux (user)
+  - [x] Lieux (user)
+  - [x] attributs de chaque entité
+  - [x] relations et connection
+  - [x] User historique
