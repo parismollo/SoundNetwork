@@ -1,9 +1,12 @@
 # Backlog
 - [ ] Schéma entités-associations
-  - [ ] multiplicités
-  - [ ] User suggestions
-  - [ ] Contraintes, par example revoir relation publish entre concert, user e post.
-  - [ ] demander si totale (pour user, concert...)
+  - [x] multiplicités
+  - [x] User suggestions
+  - [x] Contraintes, par example revoir relation publish entre concert, user e post.
+  - [ ] problème avec avis (event, user, concert passé)
+  - [ ] chanson peut etre associé à 0 playlist?
+  - [ ] plusieurs flèches relation entre concernt, avis et user.
+  - [x] demander si totale (pour user, concert...)
   - [x] Lieux (user)
   - [x] attributs de chaque entité
   - [x] relations et connection
