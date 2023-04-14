@@ -11,3 +11,9 @@
   - [x] attributs de chaque entité
   - [x] relations et connection
   - [x] User historique
+
+- [ ] Creation des tables
+
+- [ ] Remplir les tables
+
+- [ ] Requêtes
