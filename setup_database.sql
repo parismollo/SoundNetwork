@@ -8,7 +8,7 @@ DROP USER IF EXISTS admin;
 CREATE USER admin WITH PASSWORD '123456';
 
 -- create database
-CREATE DATABASE noisebook OWNER paris;
+CREATE DATABASE noisebook OWNER admin;
 
 
 -- create tables
