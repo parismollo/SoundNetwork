@@ -6,7 +6,7 @@
 
 ## Doing
 
-- [ ] Creation des tables - Paris
+- [ ] Creation des tables
 
 
 ## Done

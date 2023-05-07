@@ -1,49 +1,81 @@
 -- Drop tables if they exist
+DROP TABLE IF EXISTS follows CASCADE;
+DROP TABLE IF EXISTS friendship CASCADE;
+DROP TABLE IF EXISTS events CASCADE;
+DROP TABLE IF EXISTS groups CASCADE;
+DROP TABLE IF EXISTS persons CASCADE;
+DROP TABLE IF EXISTS places CASCADE;
+DROP TABLE IF EXISTS concertHall CASCADE;
+DROP TABLE IF EXISTS associations CASCADE;
+DROP TABLE IF EXISTS futureConcert CASCADE;
+DROP TABLE IF EXISTS pastConcert CASCADE;
+DROP TABLE IF EXISTS pastConcertMedia CASCADE;
+DROP TABLE IF EXISTS user_page CASCADE;
+DROP TABLE IF EXISTS music_notes CASCADE;
 DROP TABLE IF EXISTS user_playlist CASCADE;
 DROP TABLE IF EXISTS playlist_music CASCADE;
 DROP TABLE IF EXISTS page_playlist CASCADE;
-DROP TABLE IF EXISTS playlist CASCADE;
 DROP TABLE IF EXISTS music CASCADE;
-DROP TABLE IF EXISTS user_page CASCADE;
-
-DROP TABLE IF EXISTS associations CASCADE;
-DROP TABLE IF EXISTS places CASCADE;
-DROP TABLE IF EXISTS persons CASCADE;
-DROP TABLE IF EXISTS groups CASCADE;
-DROP TABLE IF EXISTS events CASCADE;
+DROP TABLE IF EXISTS playlist CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
-
--- Question: Est-ce qu'on met a chaque fois user_id, playlist_id, page_id....
--- Ou alors on met juste un attribut id dans chaque table ?
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   name VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE follows (
+  follower_id INT NOT NULL,
+  followed_id INT NOT NULL,
+  FOREIGN KEY (follower_id) REFERENCES users(id),
+  FOREIGN KEY (followed_id) REFERENCES users(id)
+);
+
+CREATE TABLE friendship (
+  friend1_id INT NOT NULL,
+  friend2_id INT NOT NULL,
+  FOREIGN KEY (friend1_id) REFERENCES users(id),
+  FOREIGN KEY (friend2_id) REFERENCES users(id)
+);
+
+
+/* Herite de users */
+
 CREATE TABLE events (
-  user_id INT NOT NULL,
+  user_id INT PRIMARY KEY,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE groups (
-  user_id INT NOT NULL,
+  -- group_id ?
+  user_id INT PRIMARY KEY,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-
 CREATE TABLE persons (
-  user_id INT NOT NULL,
+  -- person_id ?
+  user_id INT PRIMARY KEY,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE places (
-  user_id INT NOT NULL,
+  -- place_id ?
+  user_id INT PRIMARY KEY,
+  address VARCHAR(255) UNIQUE NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE concertHall (
+  place_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  FOREIGN KEY (place_id) REFERENCES places(user_id) ON DELETE CASCADE
+);
+
+
+
 CREATE TABLE associations (
-  user_id INT NOT NULL,
+  -- association_id ?
+  user_id INT PRIMARY KEY,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -57,7 +89,7 @@ CREATE TABLE associations (
 CREATE TABLE user_page (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  FOREIGN KEY (user_id) REFERENCES users(id) -- ON DELETE CASCADE ?
 );
 
 -- Music
@@ -68,6 +100,14 @@ CREATE TABLE music (
   author_id INT NOT NULL, -- user_id
   name VARCHAR(100) NOT NULL, -- nom de la musique
   FOREIGN KEY (author_id) REFERENCES users(id)
+);
+
+CREATE TABLE music_notes (
+  id_music INT NOT NULL,
+  id_user INT NOT NULL,
+  note INT NOT NULL CHECK (note >= 0 AND note <= 5),
+  FOREIGN KEY (id_music) REFERENCES music(id),
+  FOREIGN KEY (id_user) REFERENCES users(id)
 );
 
 -- CREATE TABLE music_note (
@@ -178,3 +218,60 @@ CREATE TABLE user_playlist (
 ------------------------------------------------------------------
 ------------------------------------------------------------------
 ------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------
+-- CONCERT
+--------------------------------------------------------------------
+CREATE TABLE pastConcert (
+  id SERIAL PRIMARY KEY,
+  organizer_event_id INT NOT NULL,
+  artists_group_id INT NOT NULL,
+  place_id INT NOT NULL,
+  price INT NOT NULL,
+  supporting_cause VARCHAR(250) NOT NULL,
+  outdoor_space BOOLEAN NOT NULL,
+  child_allowed BOOLEAN NOT NULL,
+  nb_participants INT NOT NULL,
+  FOREIGN KEY (organizer_event_id) REFERENCES events(user_id), 
+  FOREIGN KEY (artists_group_id) REFERENCES groups(user_id),
+  FOREIGN KEY (place_id) REFERENCES places(user_id)
+);
+
+/* Permet de stocker des photos d'un concert passé */
+CREATE TABLE pastConcertMedia (
+  id_pastconcert INT NOT NULL,
+  photo VARCHAR(256) NOT NULL,
+  FOREIGN KEY (id_pastconcert) REFERENCES pastConcert(id)
+);
+
+
+CREATE TABLE futureConcert (
+  id SERIAL PRIMARY KEY,
+  organizer_event_id INT NOT NULL,
+  artists_group_id INT NOT NULL,
+  place_id INT NOT NULL,
+  price INT NOT NULL,
+  supporting_cause VARCHAR(250) NOT NULL,
+  outdoor_space BOOLEAN NOT NULL,
+  child_allowed BOOLEAN NOT NULL,
+  need_volunteers BOOLEAN NOT NULL,
+  nb_interested_people INT NOT NULL,
+  nb_available_spots INT NOT NULL,
+  FOREIGN KEY (organizer_event_id) REFERENCES events(user_id), 
+  FOREIGN KEY (artists_group_id) REFERENCES groups(user_id),
+  FOREIGN KEY (place_id) REFERENCES places(user_id)
+);
