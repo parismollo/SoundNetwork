@@ -18,6 +18,12 @@ DROP TABLE IF EXISTS page_playlist CASCADE;
 DROP TABLE IF EXISTS music CASCADE;
 DROP TABLE IF EXISTS playlist CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS tags CASCADE;
+DROP TABLE IF EXISTS parent_child_tags CASCADE;
+DROP TABLE IF EXISTS check_if_parent;
+DROP TABLE IF EXISTS concert_hall_tags;
+DROP TABLE IF EXISTS event_tags;
+DROP TABLE IF EXISTS playlist_tags;
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -66,7 +72,7 @@ CREATE TABLE places (
 );
 
 CREATE TABLE concertHall (
-  place_id INT NOT NULL,
+  place_id INT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   FOREIGN KEY (place_id) REFERENCES places(user_id) ON DELETE CASCADE
 );
@@ -80,16 +86,12 @@ CREATE TABLE associations (
 );
 
 
-
-
-
-
 -- User Page
 -- 0 - 10 playlists --> table page_playlist
 CREATE TABLE user_page (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id) -- ON DELETE CASCADE ?
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- ON DELETE CASCADE ? Yes!!
 );
 
 -- Music
@@ -105,14 +107,11 @@ CREATE TABLE music (
 CREATE TABLE music_notes (
   id_music INT NOT NULL,
   id_user INT NOT NULL,
-  note INT NOT NULL CHECK (note >= 0 AND note <= 5),
+  note INT NOT NULL CHECK (note >= 0 AND note <= 5), -- nice!
   FOREIGN KEY (id_music) REFERENCES music(id),
   FOREIGN KEY (id_user) REFERENCES users(id)
 );
 
--- CREATE TABLE music_note (
-
--- );
 
 -- Playlist
 -- 0 - n user_page --> table page_playlist
@@ -165,25 +164,30 @@ CREATE TABLE playlist_music (
   PRIMARY KEY (playlist_id, music_id),
   FOREIGN KEY (playlist_id) REFERENCES playlist(id),
   FOREIGN KEY (music_id) REFERENCES music(id)
-
-  -- Contrainte: 20 musiques max pour 1 playlist
-  -- CONSTRAINT max_musics_per_playlist CHECK (
-  --   (SELECT COUNT(*) FROM playlist_music WHERE playlist_id = NEW.playlist_id) < 20
-  -- )
-
-  ------------------ TODO -------------------------------
-  -- Contrainte: Si l'AUTEUR de la playlist est un GROUPE alors
-  -- il ne peut y avoir que des musiques de ce GROUPE
-  -- CONSTRAINT if_group_only_group_musics CHECK (
-  --   -- Debut d'une requete...
-  --   SELECT p.author_id
-  --   FROM playlist p
-  --   JOIN playlist_music pm ON (pm.playlist_id = p.id)
-  --   WHERE p.author_id IN (SELECT user_id FROM groups)
-  -- )
-  -------------------------------------------------------
-
 );
+ 
+CREATE OR REPLACE FUNCTION check_author_and_songs_per_playlist()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM groups
+    WHERE groups.user_id = (SELECT author_id FROM playlist WHERE NEW.playlist_id = playlist.id)
+  ) THEN 
+    IF (
+      SELECT COUNT(*) FROM music
+      WHERE music.id = NEW.music_id AND
+      music.author_id != (SELECT author_id FROM playlist WHERE NEW.playlist_id = playlist.id)
+    ) > 0 THEN RAISE EXCEPTION 'Playlist with group as author can only contain songs from the same author group';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_author_and_songs_per_playlist
+BEFORE INSERT OR UPDATE ON playlist_music
+FOR EACH ROW
+EXECUTE FUNCTION check_author_and_songs_per_playlist();
 
 -- Contrainte: 20 musiques max pour 1 playlist
 CREATE OR REPLACE FUNCTION check_max_musics_per_playlist() 
@@ -192,7 +196,6 @@ BEGIN
     IF (SELECT COUNT(*) FROM playlist_music WHERE playlist_id = NEW.playlist_id) >= 20 THEN
         RAISE EXCEPTION 'Playlist cannot have more than 20 musics.';
     END IF;
-
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -202,40 +205,6 @@ AFTER INSERT OR UPDATE ON playlist_music
 FOR EACH ROW
 EXECUTE PROCEDURE check_max_musics_per_playlist();
 
-
-------------------------------------------------------------------
------------------------------ A VERIFIER -------------------------
-------------------------------------------------------------------
--- Lien user/playlist
--- Un user peut créer 0 - n playlists
-CREATE TABLE user_playlist (
-  user_id INT,
-  playlist_id INT,
-  PRIMARY KEY (user_id, playlist_id),
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (playlist_id) REFERENCES playlist(id)
-);
-------------------------------------------------------------------
-------------------------------------------------------------------
-------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---------------------------------------------------------------------
--- CONCERT
---------------------------------------------------------------------
 CREATE TABLE pastConcert (
   id SERIAL PRIMARY KEY,
   organizer_event_id INT NOT NULL,
@@ -275,3 +244,59 @@ CREATE TABLE futureConcert (
   FOREIGN KEY (artists_group_id) REFERENCES groups(user_id),
   FOREIGN KEY (place_id) REFERENCES places(user_id)
 );
+
+CREATE TABLE tags (
+  name VARCHAR(50) PRIMARY KEY,
+  is_parent BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE parent_child_tags (
+  parent VARCHAR(50) NOT NULL,
+  child VARCHAR(50) NOT NULL,
+  FOREIGN KEY (parent) REFERENCES tags(name),
+  FOREIGN KEY (child) REFERENCES tags(name)
+);
+
+CREATE OR REPLACE FUNCTION check_if_parent()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF(
+    SELECT 1 FROM tags
+    WHERE tags.name = NEW.parent
+    AND NOT tags.is_parent
+  ) THEN RAISE EXCEPTION 'Tag passed as parent is not a main category.';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_if_parent
+BEFORE INSERT OR UPDATE ON parent_child_tags
+FOR EACH ROW
+EXECUTE FUNCTION check_if_parent();
+
+CREATE TABLE concert_hall_tags (
+  place_id INT NOT NULL,
+  tag_name VARCHAR(50) NOT NULL,
+  PRIMARY KEY (place_id, tag_name), -- ajouter ceci ou pas?
+  FOREIGN KEY (place_id) REFERENCES concertHall(place_id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_name) REFERENCES tags(name) ON DELETE CASCADE
+);
+
+CREATE TABLE event_tags (
+  event_id INT NOT NULL,
+  tag_name VARCHAR(50) NOT NULL,
+  PRIMARY KEY (event_id, tag_name),
+  FOREIGN KEY (event_id) REFERENCES events(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_name) REFERENCES tags(name) ON DELETE CASCADE
+);
+
+CREATE TABLE playlist_tags (
+  playlist_id INT NOT NULL,
+  tag_name VARCHAR(50) NOT NULL,
+  PRIMARY KEY (playlist_id, tag_name),
+  FOREIGN KEY (playlist_id) REFERENCES playlist(id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_name) REFERENCES tags(name) ON DELETE CASCADE
+);
+
+

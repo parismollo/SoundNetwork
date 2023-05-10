@@ -10,6 +10,5 @@ CREATE USER admin WITH PASSWORD '123456';
 -- create database
 CREATE DATABASE noisebook OWNER admin;
 
-
 -- create tables
 \i create_tables.sql
