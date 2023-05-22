@@ -187,6 +187,7 @@ CREATE TABLE concert (
   supporting_cause VARCHAR(250) NOT NULL,
   outdoor_space BOOLEAN NOT NULL,
   child_allowed BOOLEAN NOT NULL,
+  concert_date DATE NOT NULL DEFAULT CURRENT_DATE,
   FOREIGN KEY (organizer_event_id) REFERENCES "event" (user_id) ON DELETE CASCADE, 
   FOREIGN KEY (artists_group_id) REFERENCES "group" (user_id) ON DELETE CASCADE,
   FOREIGN KEY (place_id) REFERENCES place (user_id) ON DELETE CASCADE
@@ -217,6 +218,7 @@ CREATE TABLE post (
   text VARCHAR(250) NOT NULL,
   user_id INT NOT NULL,
   concert_id INT NOT NULL,
+  post_date DATE NOT NULL DEFAULT CURRENT_DATE,
   FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,
   FOREIGN KEY (concert_id) REFERENCES concert (id) ON DELETE CASCADE
 );
