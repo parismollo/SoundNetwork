@@ -9,7 +9,7 @@
 -- LIMIT 1;
 
 
--- -- 2. Quel est le concert qui a le plus de photos et de vidéos ?
+-- 2. Quel est le concert qui a le plus de photos et de vidéos ?
 -- SELECT pastConcert.concert_id, COUNT(*) as media_count
 -- FROM pastConcertMedia media
 -- JOIN pastConcert ON media.pastconcert_id = pastConcert.concert_id
@@ -18,14 +18,14 @@
 -- LIMIT 1;
 
 
--- -- 3. Quels sont les 5 concerts en plein air les moins chers ?
+-- 3. Quels sont les 5 concerts en plein air les moins chers ?
 -- SELECT concert.id, concert.price
 -- FROM concert
 -- WHERE concert.outdoor_space = TRUE
 -- ORDER BY concert.price ASC 
 -- LIMIT 5;
 
--- -- 4. Quels sont les 5 personnes les plus populaires (avec le plus de followers) ?
+-- 4. Quels sont les 5 personnes les plus populaires (avec le plus de followers) ?
 -- SELECT follow.followed_id, "user".name, COUNT(*) as followers_count 
 -- FROM follow 
 -- JOIN "user" ON follow.followed_id = "user".id 
@@ -34,7 +34,7 @@
 -- LIMIT 5;
 
 
--- -- 5. Quelle musique apparait dans le plus de playlist ?
+-- 5. Quelle musique apparait dans le plus de playlist ?
 -- SELECT playlist_music.music_id, music.name, COUNT(*) as playlist_count 
 -- FROM playlist_music 
 -- JOIN music ON playlist_music.music_id = music.id
@@ -42,7 +42,7 @@
 -- ORDER BY playlist_count DESC 
 -- LIMIT 1;
 
--- -- 6. Quels sont les utilisateurs qui ont assisté à des événements organisés par leurs propres amis ?
+-- 6. Quels sont les utilisateurs qui ont assisté à des événements organisés par leurs propres amis ?
 -- SELECT action.user_id
 -- FROM action 
 -- JOIN "event" ON action.event_id = "event".user_id 
@@ -50,21 +50,23 @@
 -- WHERE "event".user_id = friendship.friend2_id 
 -- GROUP BY action.user_id;
 
--- -- 7. Quel(s) est(sont) le(s) genre(s) musical(aux) le(s) plus (moins) représenté(s) dans les playlists des utilisateurs ?
+-- 7. Quel est le genre musical le plus (ou le moins) représenté dans les playlists des utilisateurs ?
+
+-- Le plus représenté
 -- SELECT playlist_tags.tag_name, COUNT(*) as tag_count 
 -- FROM playlist_tags
 -- GROUP BY playlist_tags.tag_name
 -- ORDER BY tag_count DESC 
 -- LIMIT 1;
 
--- -- Least represented
+-- Le moins représenté
 -- SELECT playlist_tags.tag_name, COUNT(*) as tag_count 
 -- FROM playlist_tags
 -- GROUP BY playlist_tags.tag_name
 -- ORDER BY tag_count ASC 
 -- LIMIT 1;
 
--- -- 8. Quels sont les utilisateurs qui ont organisé des concerts dans au moins 2 lieux (place) différents ?
+-- 8. Quels sont les utilisateurs qui ont organisé des concerts dans au moins 2 lieux (place) différents ?
 
 -- SELECT "event".user_id
 -- FROM "event"
@@ -73,7 +75,7 @@
 -- GROUP BY "event".user_id
 -- HAVING COUNT(DISTINCT place.user_id) >= 2;
 
--- -- 9. Quel est l'événement qui a reçu le plus grand nombre de critiques (positives) de la part des utilisateurs ?
+-- 9. Quel est l'événement qui a reçu le plus grand nombre de critiques (positives) de la part des utilisateurs ?
 
 -- SELECT review.event_user_id, COUNT(*) as review_count 
 -- FROM review 
@@ -86,7 +88,7 @@
 --   GROUP BY review.event_user_id
 -- );
 
--- -- 10. Quels sont les utilisateurs qui ont créé une playlist contenant des musiques de tous les artistes qu'ils suivent ?
+-- 10. Quels sont les utilisateurs qui ont créé une playlist contenant des musiques de tous les artistes qu'ils suivent ?
 
 -- SELECT playlist.author_id
 -- FROM playlist 
@@ -97,7 +99,7 @@
 -- GROUP BY playlist.author_id;
 
 
--- -- 11. Quelle page utilisateur contient le plus grand nombre de playlists avec le tag "Hip Hop" ?
+-- 11. Quelle page utilisateur contient le plus grand nombre de playlists avec le tag "Hip Hop" ?
 
 -- SELECT page_playlist.user_page_id, COUNT(*) as playlist_count 
 -- FROM page_playlist 
@@ -108,7 +110,7 @@
 -- LIMIT 1;
 
 
--- -- 12. Quels sont les places de concert qui proposent le plus de variété musicale dans sa programmation ?
+-- 12. Quels sont les places de concert qui proposent le plus de variété musicale dans sa programmation ?
 
 -- SELECT concert.place_id, COUNT(DISTINCT music.author_id) as variety_count
 -- FROM concert 
@@ -119,7 +121,7 @@
 -- LIMIT 1;
 
 
--- -- 13. Quels sont les utilisateurs qui ont donné la note minimale à tous les evenements auxquels ils ont participé?
+-- 13. Quels sont les utilisateurs qui ont donné la note minimale à tous les evenements auxquels ils ont participé?
 
 -- SELECT review.user_id 
 -- FROM review 
@@ -130,7 +132,7 @@
 -- HAVING MIN(review.note) = 1 AND COUNT(DISTINCT "event".user_id) = COUNT(DISTINCT review.id);
 
 
--- -- 14. Quels sont les places qui ont accueilli le plus grand nombre de concert au cours de l'année dernière ?
+-- 14. Quels sont les places qui ont accueilli le plus grand nombre de concert au cours de l'année dernière ?
 
 -- SELECT concert.place_id, COUNT(*) as event_count 
 -- FROM concert 
@@ -140,8 +142,8 @@
 -- LIMIT 1;
 
 
--- -- 15. Quel est le genre musical le plus populaire parmi les utilisateurs actifs ? Un utilisateur actif est utilisateur
--- -- qui a posté au moins un commentaire sur un evenement au cours des 7 derniers jours.
+-- 15. Quel est le genre musical le plus populaire parmi les utilisateurs actifs ? Un utilisateur actif est utilisateur
+-- qui a posté au moins un commentaire sur un evenement au cours des 7 derniers jours.
 
 -- SELECT pt.tag_name, COUNT(*) AS tag_count
 -- FROM comment AS c
@@ -154,8 +156,7 @@
 -- LIMIT 1;
 
 
-
--- -- 16. Quels sont les utilisateurs qui ont assisté à des concerts d'artistes dont la popularité est supérieure à la popularité moyenne des artistes suivis par leurs amis ?
+-- 16. Quels sont les utilisateurs qui ont assisté à des concerts d'artistes dont la popularité est supérieure à la popularité moyenne des artistes suivis par leurs amis ?
 
 -- WITH artist_popularity AS (
 --   SELECT 
@@ -180,7 +181,7 @@
 -- GROUP BY action.user_id;
 
 
--- -- 17 Quels sont les utilisateurs qui ont attribué une note supérieure à la moyenne pour les musiques appartenant à une playlist avec le tag 'Hip Hop' ?
+-- 17 Quels sont les utilisateurs qui ont attribué une note supérieure à la moyenne pour les musiques appartenant à une playlist avec le tag 'Hip Hop' ?
 
 -- SELECT mn.user_id
 -- FROM music_notes mn
@@ -196,23 +197,15 @@
 --     WHERE pt2.tag_name = 'Hip Hop'
 -- );
 
+-- 18. Identifier les 5 utilisateurs ayant accordé en moyenne les meilleures notes à toutes les musiques
 
-
--- 18. Trouver les 5 utilisateurs qui ont donné les notes moyennes les plus élevées pour la musique et les lister avec leurs notes moyennes.
--- SELECT 
---     user_id, 
---     AVG(note) AS average_rating 
--- FROM 
---     music_notes 
--- GROUP BY 
---     user_id 
--- ORDER BY 
---     average_rating DESC 
+-- SELECT user_id, AVG(note) AS average_rating 
+-- FROM music_notes 
+-- GROUP BY user_id 
+-- ORDER BY average_rating DESC 
 -- LIMIT 5;
 
-
-
--- 19. Trouvez tous les tags qui sont directement ou indirectement sous un tag de catégorie principale.
+-- 19. Trouver toutes les sous-catégories d'un tag en particulier.
 
 -- WITH RECURSIVE tag_hierarchy AS (
 --   SELECT child 
@@ -225,8 +218,7 @@
 -- )
 -- SELECT * FROM tag_hierarchy;
 
---  Get each user's total participation count to concerts along with a rank based on the count.
---  20. Donner le classement entre les utilisateurs selon leur nombre total de participations à des concerts.
+--  20. Donner le classement des utilisateurs selon leur nombre total de participations à des évènements.
 
 -- WITH user_participations AS (
 --   SELECT a.user_id,
