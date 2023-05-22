@@ -282,6 +282,7 @@ CREATE TABLE review (
   note INT NOT NULL,
   user_id INT NOT NULL,
   event_user_id INT NOT NULL,
+  review_date DATE NOT NULL DEFAULT CURRENT_DATE,
   FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,
   FOREIGN KEY (event_user_id) REFERENCES "event" (user_id) ON DELETE CASCADE
 );
