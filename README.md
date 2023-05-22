@@ -245,32 +245,6 @@ JOIN playlist p ON p.id = pm.playlist_id AND p.author_id = u.id;
 
 Notez que les requêtes sont basées sur la structure de la base de données fournie, et il est important d'avoir les données appropriées pour obtenir des résultats significatifs.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## VERSION 2
 --------
 
@@ -403,38 +377,6 @@ Combien de playlists contiennent au moins une musique de l'artiste XYZ et ont é
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Organisation des questions
 
 ## QUESTIONS FACILES (5 questions ?)
@@ -443,6 +385,60 @@ Combien de playlists contiennent au moins une musique de l'artiste XYZ et ont é
 - Quels sont les 5 concerts en plein air les moins chers ?
 - Quels sont les 5 personnes les plus populaires (avec le plus de followers) ?
 - Quelle musique apparait dans le plus de playlist ?
+
+### SQL Queries
+
+1. Quel est l'artiste qui apparait dans le plus de playlist (avec le tag "Rock" ou pas)?
+```sql
+SELECT music.author_id, "user".name, COUNT(*) as playlist_count 
+FROM playlist_music 
+JOIN music ON playlist_music.music_id = music.id
+JOIN "user" ON music.author_id = "user".id 
+GROUP BY music.author_id, "user".name
+ORDER BY playlist_count DESC 
+LIMIT 1;
+```
+
+2. Quel est le concert qui a le plus de photos et de vidéos ?
+```sql
+SELECT pastConcert.concert_id, COUNT(*) as media_count
+FROM pastConcertMedia
+JOIN pastConcert ON pastConcertMedia.pastconcert_id = pastConcert.concert_id
+GROUP BY pastConcert.concert_id
+ORDER BY media_count DESC 
+LIMIT 1;
+```
+
+3. Quels sont les 5 concerts en plein air les moins chers ?
+```sql
+SELECT concert.id, concert.price
+FROM concert
+WHERE concert.outdoor_space = TRUE
+ORDER BY concert.price ASC 
+LIMIT 5;
+```
+
+4. Quels sont les 5 personnes les plus populaires (avec le plus de followers) ?
+```sql
+SELECT follow.followed_id, "user".name, COUNT(*) as followers_count 
+FROM follow 
+JOIN "user" ON follow.followed_id = "user".id 
+GROUP BY follow.followed_id, "user".name
+ORDER BY followers_count DESC 
+LIMIT 5;
+```
+
+5. Quelle musique apparait dans le plus de playlist ?
+```sql
+SELECT playlist_music.music_id, music.name, COUNT(*) as playlist_count 
+FROM playlist_music 
+JOIN music ON playlist_music.music_id = music.id
+GROUP BY playlist_music.music_id, music.name
+ORDER BY playlist_count DESC 
+LIMIT 1;
+```
+
+
 
 ## QUESTIONS MOYENNES (10 questions ?)
 - Quels sont les utilisateurs qui ont assisté à des événements organisés par leurs propres amis ?
@@ -456,8 +452,177 @@ Combien de playlists contiennent au moins une musique de l'artiste XYZ et ont é
 - Quels sont les utilisateurs qui ont assisté à des événements organisés par des utilisateurs qu'ils suivent depuis moins de 6 mois ?
 - Quel(s) est(sont) le(s) place(s) de concert qui a accueilli le plus grand nombre d'événements au cours de l'année dernière ?
 
+## SQL Queries
+
+1. Quels sont les utilisateurs qui ont assisté à des événements organisés par leurs propres amis ?
+```sql
+SELECT action.user_id
+FROM action 
+JOIN "event" ON action.event_id = "event".user_id 
+JOIN friendship ON action.user_id = friendship.friend1_id 
+WHERE "event".user_id = friendship.friend2_id 
+GROUP BY action.user_id;
+```
+
+2. Quel(s) est(sont) le(s) genre(s) musical(aux) le(s) plus (moins) représenté(s) dans les playlists des utilisateurs ?
+```sql
+-- Most represented
+SELECT playlist_tags.tag_name, COUNT(*) as tag_count 
+FROM playlist_tags
+GROUP BY playlist_tags.tag_name
+ORDER BY tag_count DESC 
+LIMIT 1;
+
+-- Least represented
+SELECT playlist_tags.tag_name, COUNT(*) as tag_count 
+FROM playlist_tags
+GROUP BY playlist_tags.tag_name
+ORDER BY tag_count ASC 
+LIMIT 1;
+```
+
+3. Quels sont les utilisateurs qui ont organisé des événements dans des salles de concert situées dans des villes différentes de leur lieu de résidence ?
+```sql
+SELECT "event".user_id
+FROM "event" 
+JOIN concert ON "event".user_id = concert.organizer_event_id 
+JOIN place ON concert.place_id = place.user_id
+WHERE "event".user_id != place.user_id;
+```
+
+4. Quel est l'événement qui a reçu le plus grand nombre de critiques (positives ou negatives ou rien) de la part des utilisateurs ?
+```sql
+SELECT review.event_user_id, COUNT(*) as review_count 
+FROM review 
+GROUP BY review.event_user_id
+ORDER BY review_count DESC 
+LIMIT 1;
+```
+
+5. Quels sont les utilisateurs qui ont créé une playlist contenant des musiques de tous les artistes qu'ils suivent ?
+```sql
+SELECT playlist.author_id
+FROM playlist 
+JOIN playlist_music ON playlist.id = playlist_music.playlist_id 
+JOIN music ON playlist_music.music_id = music.id
+JOIN follow ON playlist.author_id = follow.follower_id
+WHERE music.author_id = follow.followed_id
+GROUP BY playlist.author_id;
+```
+
+6. Quelle page utilisateur contient le plus grand nombre de playlists avec le tag "Summer Vibes" ?
+```sql
+SELECT page_playlist.user_page_id, COUNT(*) as playlist_count 
+FROM page_playlist 
+JOIN playlist_tags ON page_playlist.playlist_id = playlist_tags.playlist_id 
+WHERE playlist_tags.tag_name = 'Summer Vibes'
+GROUP BY page_playlist.user_page_id
+ORDER BY playlist_count DESC 
+LIMIT 1;
+```
+
+7. Quel(s) est(sont) le(s) place(s) de concert qui propose(nt) le plus de variété musicale dans sa programmation ?
+```sql
+SELECT concert.place_id, COUNT(DISTINCT music.author_id) as variety_count
+FROM concert 
+JOIN "group" ON concert.artists_group_id = "group".user_id 
+JOIN music ON "group".user_id = music.author_id 
+GROUP BY concert.place_id
+ORDER BY variety_count DESC
+LIMIT 1;
+```
+
+8. Quels sont les utilisateurs qui ont donné la note minimale à tous les concerts auxquels ils ont participé, sauf un ?
+```sql
+SELECT review.user_id 
+FROM review 
+JOIN "event" ON review.event_user_id = "event".user_id 
+JOIN action ON review.user_id = action.user_id AND "event".user_id = action.event_id
+GROUP BY review.user_id 
+HAVING COUNT(*) - 1 = SUM(CASE WHEN review.note = 1 THEN 1 ELSE 0 END);
+```
+
+9.
+
+ Quels sont les utilisateurs qui ont assisté à des événements organisés par des utilisateurs qu'ils suivent depuis moins de 6 mois ?
+```sql
+SELECT action.user_id
+FROM action 
+JOIN "event" ON action.event_id = "event".user_id 
+JOIN follow ON action.user_id = follow.follower_id 
+WHERE "event".user_id = follow.followed_id AND follow.follow_date > CURRENT_DATE - INTERVAL '6 months'
+GROUP BY action.user_id;
+```
+
+10. Quel(s) est(sont) le(s) place(s) de concert qui a accueilli le plus grand nombre d'événements au cours de l'année dernière ?
+```sql
+SELECT concert.place_id, COUNT(*) as event_count 
+FROM concert 
+JOIN "event" ON concert.event_id = "event".user_id
+WHERE "event".date > CURRENT_DATE - INTERVAL '1 year'
+GROUP BY concert.place_id
+ORDER BY event_count DESC
+LIMIT 1;
+```
+
 ## QUESTIONS DIFFICILES (5 questions ?)
 - Quel(s) est(sont) le(s) genre(s) musical(aux) le plus populaire(s) parmi les utilisateurs actifs ? Un utilisateur actif est utilisateur qui a posté au moins un commentaire sur un evenement au cours des 7 derniers jours (par exemple).
 - Quels sont les utilisateurs qui ont assisté à des concerts d'artistes dont la popularité est supérieure à la popularité moyenne des artistes suivis par leurs amis ?
 - Quels sont les événements organisés par des utilisateurs dont la moyenne des notes attribuées par leurs amis est supérieure à la moyenne des notes attribuées à tous les événements ?
 - Pour chaque mois de 2022, quels sont les cinq groupes dont les concerts ont été les plus partagés ce mois-ci, en termes de nombre de photos/vidéos postées?
+
+1. Quel(s) est(sont) le(s) genre(s) musical(aux) le plus populaire(s) parmi les utilisateurs actifs ? Un utilisateur actif est utilisateur qui a posté au moins un commentaire sur un evenement au cours des 7 derniers jours (par exemple).
+```sql
+SELECT playlist_tags.tag_name, COUNT(*) as tag_count
+FROM comment
+JOIN action ON comment.user_id = action.user_id
+JOIN playlist ON action.user_id = playlist.author_id
+JOIN playlist_tags ON playlist.id = playlist_tags.playlist_id
+WHERE comment.date > CURRENT_DATE - INTERVAL '7 days'
+GROUP BY playlist_tags.tag_name
+ORDER BY tag_count DESC 
+LIMIT 1;
+```
+
+2. Quels sont les utilisateurs qui ont assisté à des concerts d'artistes dont la popularité est supérieure à la popularité moyenne des artistes suivis par leurs amis ?
+```sql
+SELECT action.user_id
+FROM action 
+JOIN friendship ON action.user_id = friendship.friend1_id 
+JOIN follow ON friendship.friend2_id = follow.follower_id 
+JOIN artist ON follow.followed_id = artist.id
+WHERE artist.popularity > (
+    SELECT AVG(artist.popularity)
+    FROM artist
+    JOIN follow ON artist.id = follow.followed_id
+    JOIN friendship ON follow.follower_id = friendship.friend2_id
+    WHERE friendship.friend1_id = action.user_id
+)
+GROUP BY action.user_id;
+```
+
+3. Quels sont les événements organisés par des utilisateurs dont la moyenne des notes attribuées par leurs amis est supérieure à la moyenne des notes attribuées à tous les événements ?
+
+```sql
+SELECT "event".user_id
+FROM "event" 
+JOIN review ON "event".user_id = review.event_user_id
+JOIN friendship ON "event".user_id = friendship.friend2_id
+WHERE AVG(review.note) > (
+    SELECT AVG(review.note) 
+    FROM review
+)
+GROUP BY "event".user_id;
+```
+
+4. Pour chaque mois de 2022, quels sont les cinq groupes dont les concerts ont été les plus partagés ce mois-ci, en termes de nombre de photos/vidéos postées?
+```sql
+SELECT "group".user_id, date_trunc('month', media.date) as month, COUNT(*) as media_count
+FROM "group"
+JOIN concert ON "group".user_id = concert.artists_group_id
+JOIN action ON concert.event_id = action.event_id
+JOIN media ON action.user_id = media.user_id
+WHERE media.date >= '2022-01-01' AND media.date < '2023-01-01'
+GROUP BY "group".user_id, month
+ORDER BY month, media_count DESC;
+```
