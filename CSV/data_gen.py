@@ -17,7 +17,6 @@ class DataGen:
       csv_writer = csv.writer(csv_file)
       csv_writer.writerow(['name'])
       csv_writer.writerows(data)
-    
 
 if __name__ == "__main__":
   gen = DataGen()
