@@ -93,15 +93,6 @@ with open('CSV/comment.csv', 'w', newline='') as file:
     for i in comment_ids:
         writer.writerow([i, random.choice(user_ids), fake.text(), random.choice(post_ids)])
 
-# music_tag, post_tag
-with open('CSV/music_tag.csv', 'w', newline='') as file, open('CSV/post_tag.csv', 'w', newline='') as file2:
-    writer1 = csv.writer(file)
-    writer2 = csv.writer(file2)
-    for i in music_ids:
-        writer1.writerow([i, random.choice(tag_ids)])
-    for i in post_ids:
-        writer2.writerow([i, random.choice(tag_ids)])
-
 # action
 with open('CSV/action.csv', 'w', newline='') as file:
     writer = csv.writer(file)
@@ -143,3 +134,40 @@ with open('CSV/concert.csv', 'w', newline='') as file:
         outdoor_space = random.choice([True, False])
         child_allowed = random.choice([True, False])
         writer.writerow([i, price, organizers, lineup, available_seats, place, need_volunteers, supporting_cause, outdoor_space, child_allowed])
+
+# music_notes
+with open('CSV/music_notes.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    for _ in range(num_music):
+        writer.writerow([random.choice(music_ids), random.choice(user_ids), random.randint(1, 5)])
+
+# playlist_music
+with open('CSV/playlist_music.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    for _ in range(num_music):
+        writer.writerow([random.choice(playlist_ids), random.choice(music_ids)])
+
+# page_playlist
+with open('CSV/page_playlist.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    for i in range(num_user_page):
+        for j in random.sample(playlist_ids, 10):  # Each page can have a maximum of 10 playlists
+            writer.writerow([i + 1, j])
+
+# pastConcert
+with open('CSV/pastConcert.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    for _ in range(num_concerts // 2):  # Assuming half of the concerts are in the past
+        writer.writerow([random.choice(concert_ids), random.randint(10, 100)])
+
+# pastConcertMedia
+with open('CSV/pastConcertMedia.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    for i in range(1, num_concerts // 2 + 1):
+        writer.writerow([i, fake.file_path(depth=2, extension='jpg')])
+
+# futureConcert
+with open('CSV/futureConcert.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    for i in range(num_concerts // 2, num_concerts):  # Assuming the other half are future concerts
+        writer.writerow([i + 1, random.choice([True, False]), random.randint(10, 100), random.randint(20, 200)])
