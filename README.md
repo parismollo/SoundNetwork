@@ -1,8 +1,13 @@
 # Rapport de projet
+- [Rapport de projet](#rapport-de-projet)
+  - [Schéma entités-associations](#schéma-entités-associations)
+  - [Modélisation de la base de données](#modélisation-de-la-base-de-données)
+  - [Realisation du projet](#realisation-du-projet)
 
-## Schema E/R
+## Schéma entités-associations
+![diagramme](architecture.png)
 
-# Modèle 
+## Modélisation de la base de données
 
 1. `user`
     - `id`: clé primaire, auto-incrémentée.

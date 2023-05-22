@@ -18,10 +18,8 @@ num_tags = 7
 num_actions = 200
 num_user_page = 100
 num_events = 20
-num_groups = 20 # A utilisé
+num_groups = 20
 num_parent_child_tags = 2
-
-
 num_concert_hall_tags = 5
 num_event_tags = 5
 num_playlist_tags = 5
@@ -173,13 +171,8 @@ with open('CSV/concert.csv', 'w', newline='') as file:
     for i in concert_ids:
         price = random.randint(10, 100)
         organizers = random.choice(user_ids)
-
-        # CHANGE FOR GROUP_id
         lineup = random.choice(user_ids)
-
-        # available_seats = random.randint(50, 500)
         place = random.choice(place_ids)
-        # need_volunteers = random.choice([True, False])
         supporting_cause = fake.text(max_nb_chars=200)
         outdoor_space = random.choice([True, False])
         child_allowed = random.choice([True, False])
