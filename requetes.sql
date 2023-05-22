@@ -98,7 +98,6 @@
 -- WHERE music.author_id = follow.followed_id
 -- GROUP BY playlist.author_id;
 
-
 -- 11. Quelle page utilisateur contient le plus grand nombre de playlists avec le tag "Hip Hop" ?
 
 -- SELECT page_playlist.user_page_id, COUNT(*) as playlist_count 
@@ -126,20 +125,27 @@
 -- SELECT review.user_id 
 -- FROM review 
 -- JOIN "event" ON review.event_user_id = "event".user_id 
--- JOIN action ON review.user_id = action.user_id AND "event".user_id = action.event_id
--- WHERE action.type = 'Participe'
+-- WHERE review.user_id IN (
+--   SELECT action.user_id
+--   FROM action 
+--   WHERE action.type = 'Participe' AND action.event_id = "event".user_id
+--   GROUP BY action.user_id 
+-- )
 -- GROUP BY review.user_id 
 -- HAVING MIN(review.note) = 1 AND COUNT(DISTINCT "event".user_id) = COUNT(DISTINCT review.id);
 
-
 -- 14. Quels sont les places qui ont accueilli le plus grand nombre de concert au cours de l'année dernière ?
 
--- SELECT concert.place_id, COUNT(*) as event_count 
--- FROM concert 
--- WHERE concert.concert_date > CURRENT_DATE - INTERVAL '1 year'
--- GROUP BY concert.place_id
+-- SELECT c.place_id, COUNT(*) as event_count 
+-- FROM (
+--   SELECT place_id 
+--   FROM concert 
+--   WHERE concert_date > CURRENT_DATE - INTERVAL '1 year'
+-- ) AS c
+-- GROUP BY c.place_id
 -- ORDER BY event_count DESC
 -- LIMIT 1;
+
 
 
 -- 15. Quel est le genre musical le plus populaire parmi les utilisateurs actifs ? Un utilisateur actif est utilisateur
@@ -197,6 +203,7 @@
 --     WHERE pt2.tag_name = 'Hip Hop'
 -- );
 
+
 -- 18. Identifier les 5 utilisateurs ayant accordé en moyenne les meilleures notes à toutes les musiques
 
 -- SELECT user_id, AVG(note) AS average_rating 
@@ -231,4 +238,3 @@
 -- SELECT up.user_id, up.participation_count,
 --   RANK() OVER (ORDER BY up.participation_count DESC) as rank
 -- FROM user_participations up;
-
