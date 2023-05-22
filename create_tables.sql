@@ -118,19 +118,19 @@ CREATE TABLE page_playlist (
   FOREIGN KEY (playlist_id) REFERENCES playlist (id) ON DELETE CASCADE
 );
 
-CREATE OR REPLACE FUNCTION max_playlists_per_page_check() RETURNS TRIGGER AS $$
-BEGIN
-    IF (SELECT COUNT(*) FROM page_playlist WHERE user_page_id = NEW.user_page_id) > 10 THEN
-        RAISE EXCEPTION 'Le nombre maximum de playlists pour une page est de 10';
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION max_playlists_per_page_check() RETURNS TRIGGER AS $$
+-- BEGIN
+--     IF (SELECT COUNT(*) FROM page_playlist WHERE user_page_id = NEW.user_page_id) > 10 THEN
+--         RAISE EXCEPTION 'Le nombre maximum de playlists pour une page est de 10';
+--     END IF;
+--     RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE CONSTRAINT TRIGGER max_playlists_per_page
-AFTER INSERT OR UPDATE ON page_playlist
-FOR EACH ROW
-EXECUTE FUNCTION max_playlists_per_page_check();
+-- CREATE CONSTRAINT TRIGGER max_playlists_per_page
+-- AFTER INSERT OR UPDATE ON page_playlist
+-- FOR EACH ROW
+-- EXECUTE FUNCTION max_playlists_per_page_check();
 
 CREATE TABLE playlist_music (
   playlist_id INT,
@@ -140,43 +140,43 @@ CREATE TABLE playlist_music (
   FOREIGN KEY (music_id) REFERENCES music (id) ON DELETE CASCADE
 );
 
-CREATE OR REPLACE FUNCTION check_author_and_songs_per_playlist()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM "group"
-    WHERE "group".user_id = (SELECT author_id FROM playlist WHERE NEW.playlist_id = playlist.id)
-  ) THEN 
-    IF (
-      SELECT COUNT(*) FROM music
-      WHERE music.id = NEW.music_id AND
-      music.author_id != (SELECT author_id FROM playlist WHERE NEW.playlist_id = playlist.id)
-    ) > 0 THEN RAISE EXCEPTION 'Playlist with group as author can only contain songs from the same author group';
-    END IF;
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION check_author_and_songs_per_playlist()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--   IF EXISTS (
+--     SELECT 1 FROM "group"
+--     WHERE "group".user_id = (SELECT author_id FROM playlist WHERE NEW.playlist_id = playlist.id)
+--   ) THEN 
+--     IF (
+--       SELECT COUNT(*) FROM music
+--       WHERE music.id = NEW.music_id AND
+--       music.author_id != (SELECT author_id FROM playlist WHERE NEW.playlist_id = playlist.id)
+--     ) > 0 THEN RAISE EXCEPTION 'Playlist with group as author can only contain songs from the same author group';
+--     END IF;
+--   END IF;
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER check_author_and_songs_per_playlist
-BEFORE INSERT OR UPDATE ON playlist_music
-FOR EACH ROW
-EXECUTE FUNCTION check_author_and_songs_per_playlist();
+-- CREATE TRIGGER check_author_and_songs_per_playlist
+-- BEFORE INSERT OR UPDATE ON playlist_music
+-- FOR EACH ROW
+-- EXECUTE FUNCTION check_author_and_songs_per_playlist();
 
-CREATE OR REPLACE FUNCTION check_max_musics_per_playlist() 
-RETURNS TRIGGER AS $$
-BEGIN
-    IF (SELECT COUNT(*) FROM playlist_music WHERE playlist_id = NEW.playlist_id) >= 20 THEN
-        RAISE EXCEPTION 'Playlist cannot have more than 20 musics.';
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION check_max_musics_per_playlist() 
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--     IF (SELECT COUNT(*) FROM playlist_music WHERE playlist_id = NEW.playlist_id) >= 20 THEN
+--         RAISE EXCEPTION 'Playlist cannot have more than 20 musics.';
+--     END IF;
+--     RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE CONSTRAINT TRIGGER max_musics_per_playlist
-AFTER INSERT OR UPDATE ON playlist_music
-FOR EACH ROW
-EXECUTE FUNCTION check_max_musics_per_playlist();
+-- CREATE CONSTRAINT TRIGGER max_musics_per_playlist
+-- AFTER INSERT OR UPDATE ON playlist_music
+-- FOR EACH ROW
+-- EXECUTE FUNCTION check_max_musics_per_playlist();
 
 CREATE TABLE concert (
   id SERIAL PRIMARY KEY,
@@ -235,23 +235,23 @@ CREATE TABLE parent_child_tags (
   FOREIGN KEY (child) REFERENCES tags (name) ON DELETE CASCADE
 );
 
-CREATE OR REPLACE FUNCTION check_if_parent()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF(
-    SELECT 1 FROM tags
-    WHERE tags.name = NEW.parent
-    AND NOT tags.is_parent
-  ) THEN RAISE EXCEPTION 'Tag passed as parent is not a main category.';
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION check_if_parent()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--   IF(
+--     SELECT 1 FROM tags
+--     WHERE tags.name = NEW.parent
+--     AND NOT tags.is_parent
+--   ) THEN RAISE EXCEPTION 'Tag passed as parent is not a main category.';
+--   END IF;
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER check_if_parent
-BEFORE INSERT OR UPDATE ON parent_child_tags
-FOR EACH ROW
-EXECUTE FUNCTION check_if_parent();
+-- CREATE TRIGGER check_if_parent
+-- BEFORE INSERT OR UPDATE ON parent_child_tags
+-- FOR EACH ROW
+-- EXECUTE FUNCTION check_if_parent();
 
 CREATE TABLE concert_hall_tags (
   place_id INT NOT NULL,
@@ -303,7 +303,7 @@ CREATE TABLE commentTag (
 
 CREATE TABLE action (
   id SERIAL PRIMARY KEY,
-  type VARCHAR(20) CHECK (type IN ('Participé', 'Interessé')),
+  type VARCHAR(20) CHECK (type IN ('Participe', 'Interesse')),
   user_id INT,
   event_id INT,
   FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,

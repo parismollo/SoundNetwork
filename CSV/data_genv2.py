@@ -14,10 +14,25 @@ num_music = 200
 num_posts = 100
 num_reviews = 100
 num_comments = 200
-num_tags = 50
+num_tags = 7
 num_actions = 200
 num_user_page = 100
+num_events = 20
+num_groups = 20 # A utilisé
+num_parent_child_tags = 2
 
+
+num_concert_hall_tags = 5
+num_event_tags = 5
+num_playlist_tags = 5
+num_comment_tags = 5
+
+concert_hall_tag_ids = list(range(1, num_concert_hall_tags + 1))
+event_tag_ids = list(range(1, num_event_tags + 1))
+playlist_tag_ids = list(range(1, num_playlist_tags + 1))
+comment_tag_ids = list(range(1, num_comment_tags + 1))
+tag_ids = list(range(1, num_tags + 1))
+event_ids = list(range(1, num_events + 1))
 user_ids = list(range(1, num_users + 1))
 place_ids = list(range(1, num_places + 1))
 concert_ids = list(range(1, num_concerts + 1))
@@ -31,6 +46,14 @@ action_ids = list(range(1, num_actions + 1))
 user_page_ids = list(range(1, num_user_page + 1))
 
 unique_names = set()
+parent_child_tag_ids = list(range(1, num_parent_child_tags + 1))
+
+
+notes = [1, 2, 3, 4, 5]
+
+
+genres = ['Rock', 'Pop', 'Hip Hop', 'Jazz', 'Classical', 'Country', 'Electronic']
+sub_genres = ['Alternative Rock', 'Pop Rock', 'Trap', 'Smooth Jazz', 'Baroque', 'Bluegrass', 'Ambient']
 
 # user
 with open('CSV/user.csv', 'w', newline='') as file:
@@ -102,20 +125,20 @@ with open('CSV/post.csv', 'w', newline='') as file1, open('CSV/review.csv', 'w',
 
     for i in range(1, num_reviews + 1):
         review_date = current_date - timedelta(days=i)  # Decrementing date for each review
-        writer2.writerow([i, random.choice(user_ids), random.choice(music_ids), fake.text(), review_date])
+        writer2.writerow([i, random.choice(notes), random.choice(user_ids), random.choice(event_ids)])
 
 # comment
 with open('CSV/comment.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(["SKIP"])
     for i in comment_ids:
-        writer.writerow([i, random.choice(user_ids), fake.text(), random.choice(post_ids)])
+        writer.writerow([fake.text(), random.choice(review_ids)])
 
 # action
 with open('CSV/action.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(["SKIP"])
-    actions = ['Interessé', 'Participe']
+    actions = ['Interesse', 'Participe']
     for i in action_ids:
         writer.writerow([i, random.choice(actions), random.choice(user_ids), random.choice(concert_ids)])
 
@@ -125,8 +148,9 @@ with open('CSV/tag.csv', 'w', newline='') as file:
     writer.writerow(["SKIP"])
     genres = ['Rock', 'Pop', 'Hip Hop', 'Jazz', 'Classical', 'Country', 'Electronic']
     sub_genres = ['Alternative Rock', 'Pop Rock', 'Trap', 'Smooth Jazz', 'Baroque', 'Bluegrass', 'Ambient']
+    d = set()
     for i in range(1, num_tags + 1):
-        writer.writerow([i, random.choice(genres + sub_genres)])
+        writer.writerow([genres[i - 1], False])
 
 # user_page
 with open('CSV/user_page.csv', 'w', newline='') as file:
@@ -173,8 +197,12 @@ with open('CSV/music_notes.csv', 'w', newline='') as file:
 with open('CSV/playlist_music.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(["SKIP"])
+    d = set()
     for _ in range(num_music):
-        writer.writerow([random.choice(playlist_ids), random.choice(music_ids)])
+        a, b = random.choice(playlist_ids), random.choice(music_ids)
+        if (a,b) not in d:
+            writer.writerow([a, b])
+            d.add((a, b))
 
 # page_playlist
 with open('CSV/page_playlist.csv', 'w', newline='') as file:
@@ -184,18 +212,24 @@ with open('CSV/page_playlist.csv', 'w', newline='') as file:
         for j in random.sample(playlist_ids, 10):  # Each page can have a maximum of 10 playlists
             writer.writerow([i + 1, j])
 
+past_concert_ids = set()
 # pastConcert
 with open('CSV/pastConcert.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(["SKIP"])
+    d = set()
     for _ in range(num_concerts // 2):  # Assuming half of the concerts are in the past
-        writer.writerow([random.choice(concert_ids), random.randint(10, 100)])
+        n = random.choice(concert_ids)
+        if n not in d:
+            writer.writerow([n, random.randint(10, 100)])
+            d.add(n)
+    past_concert_ids = d
 
 # pastConcertMedia
 with open('CSV/pastConcertMedia.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(["SKIP"])
-    for i in range(1, num_concerts // 2 + 1):
+    for i in past_concert_ids:
         writer.writerow([i, fake.file_path(depth=2, extension='jpg')])
 
 # futureConcert
@@ -204,3 +238,44 @@ with open('CSV/futureConcert.csv', 'w', newline='') as file:
     writer.writerow(["SKIP"])
     for i in range(num_concerts // 2, num_concerts):  # Assuming the other half are future concerts
         writer.writerow([i + 1, random.choice([True, False]), random.randint(10, 100), random.randint(20, 200)])
+
+# concert_hall_tags
+with open('CSV/concert_hall_tags.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(["SKIP"])
+    for i in concert_hall_tag_ids:
+        writer.writerow([random.choice(place_ids), random.choice(genres)])
+
+# event_tags
+with open('CSV/event_tags.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(["SKIP"])
+    d = set()
+    for i in event_tag_ids:
+        n = random.choice(event_ids)
+        if n not in d:
+            writer.writerow([n, random.choice(genres)])
+            d.add(n)
+
+# playlist_tags
+with open('CSV/playlist_tags.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(["SKIP"])
+    s = set()
+    for i in playlist_tag_ids:
+        writer.writerow([random.choice(playlist_ids), random.choice(genres)])
+
+# commentTag
+with open('CSV/commentTag.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(["SKIP"])
+    for i in comment_tag_ids:
+        writer.writerow([random.choice(comment_ids), random.choice(genres)])
+
+with open('CSV/parent_child_tags.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(["SKIP"])
+    for _ in range(num_parent_child_tags):
+        parent_tag = random.choice(genres)
+        child_tag = random.choice(genres)
+        writer.writerow([parent_tag, child_tag])
